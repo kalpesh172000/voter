@@ -5,8 +5,7 @@ import { Program } from '@coral-xyz/anchor'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Voter } from '../target/types/voter'
 
-/* import { IDL } from '../target/idl/voter.json' */
-const IDL = require('../target/idl/voter.json')
+import idl from '../target/idl/voter.json'
 
 const PROGRAM_ID = new PublicKey('GpCjJo1DqXs4qPkiCW7DaX8ggxVKTvczDLZ7Rk3uCRbu')
 
@@ -18,7 +17,8 @@ describe('voter', () => {
     beforeAll(async () => {
         context = await startAnchor('', [{ name: 'voter', programId: PROGRAM_ID }], [])
         provider = new BankrunProvider(context)
-        voterPogram = new Program<Voter>(IDL, provider)
+        //eureka moment idl as unknown as Voter // i used 'as Idl' i didn't specify the <Voter>
+        voterPogram = new Program<Voter>(idl as unknown as Voter, provider)
     })
 
     it('Initialize Poll', async () => {
