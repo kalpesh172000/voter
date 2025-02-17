@@ -1,3 +1,9 @@
 {
-  "extends": "../tsconfig.json"
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "module": "CommonJS",
+        "esModuleInterop": true,
+        "detectOpenHandles": true,
+        "strict": true
+    }
 }
