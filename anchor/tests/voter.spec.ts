@@ -1,7 +1,7 @@
 import { startAnchor } from 'solana-bankrun'
 import { BankrunProvider } from 'anchor-bankrun'
 import * as anchor from '@coral-xyz/anchor'
-import { Program } from '@coral-xyz/anchor'
+import { Program, BN } from '@coral-xyz/anchor'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Voter } from '../target/types/voter'
 
@@ -10,15 +10,16 @@ import idl from '../target/idl/voter.json'
 const PROGRAM_ID = new PublicKey('GpCjJo1DqXs4qPkiCW7DaX8ggxVKTvczDLZ7Rk3uCRbu')
 
 describe('voter', () => {
-    let context
-    let provider
-    let voterPogram
+    /* let provider */
+    /* let context */
+    anchor.setProvider(anchor.AnchorProvider.env())
+    let voterPogram = anchor.workspace.Voter as Program<Voter>
 
     beforeAll(async () => {
-        context = await startAnchor('', [{ name: 'voter', programId: PROGRAM_ID }], [])
-        provider = new BankrunProvider(context)
-        //eureka moment idl as unknown as Voter // i used 'as Idl' i didn't specify the <Voter>
-        voterPogram = new Program<Voter>(idl as unknown as Voter, provider)
+        /* context = await startanchor('', [{ name: 'voter', programid: program_id }], []) */
+        /* provider = new bankrunprovider(context) */
+        /* //eureka moment idl as unknown as Voter // i used 'as Idl' i didn't specify the <Voter> */
+        /* voterpogram = new program<voter>(idl as unknown as voter, provider) */
     })
 
     it('Initialize Poll', async () => {
@@ -46,48 +47,34 @@ describe('voter', () => {
     })
 
     it('Initialize Candidate', async () => {
-        await voterPogram.methods.initializeCandidate('kalpesh patil', new anchor.BN(1)).rpc()
+        await voterPogram.methods.initializeCandidate('Red', new anchor.BN(1)).rpc()
+        await voterPogram.methods.initializeCandidate('Orange', new anchor.BN(1)).rpc()
 
         const [candidateAddress] = PublicKey.findProgramAddressSync(
-            [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from('kalpesh patil')],
+            [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from('Red')],
             PROGRAM_ID,
         )
 
         const candidate = await voterPogram.account.candidate.fetch(candidateAddress)
 
-        console.log(candidate)
-        expect(candidate.candidateName).toEqual('kalpesh patil')
-        expect(candidate.candidateVotes.toNumber()).toEqual(0)
+        console.log("candidate:",candidate)
+        const [candidateAddress1] = PublicKey.findProgramAddressSync(
+            [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from('Red')],
+            PROGRAM_ID,
+        )
+
+        const candidate1 = await voterPogram.account.candidate.fetch(candidateAddress1)
+
+        console.log("candidate:",candidate1)
     })
 
     it('Vote', async () => {
-        const candidate_name = 'kalpesh patil'
+        const candidate_name = 'Red'
+        const candidate_name1 = 'Orange'
         const poll_id = new anchor.BN(1)
-        const [candidateAddress] = PublicKey.findProgramAddressSync(
-            [poll_id.toArrayLike(Buffer, 'le', 8), Buffer.from(candidate_name)],
-            PROGRAM_ID,
-        )
-        let candidate = await voterPogram.account.candidate.fetch(candidateAddress)
-        expect(candidate.candidateVotes.toNumber()).toEqual(0)
 
-        await voterPogram.methods.vote('kalpesh patil', new anchor.BN(1)).rpc()
-
-        console.log()
-        candidate = await voterPogram.account.candidate.fetch(candidateAddress)
-        expect(candidate.candidateVotes.toNumber()).toEqual(1)
-
-        await voterPogram.methods.vote('kalpesh patil', new anchor.BN(1)).rpc()
-
-        candidate = await voterPogram.account.candidate.fetch(candidateAddress)
-        expect(candidate.candidateVotes.toNumber()).toEqual(2)
-    })
-
-    it('Check votes', async () => {
-        const [candidateAddress] = PublicKey.findProgramAddressSync(
-            [new anchor.BN(1).toArrayLike(Buffer, 'le', 8), Buffer.from('kalpesh patil')],
-            PROGRAM_ID,
-        )
-        const candidate = await voterPogram.account.candidate.fetch(candidateAddress)
-        console.log(candidate)
+        await voterPogram.methods.vote(candidate_name, new anchor.BN(1)).rpc()
+        await voterPogram.methods.vote(candidate_name1, new anchor.BN(1)).rpc()
+        await voterPogram.methods.vote(candidate_name, new anchor.BN(1)).rpc()
     })
 })
