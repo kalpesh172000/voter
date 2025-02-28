@@ -15,13 +15,6 @@ describe('voter', () => {
     anchor.setProvider(anchor.AnchorProvider.env())
     let voterPogram = anchor.workspace.Voter as Program<Voter>
 
-    beforeAll(async () => {
-        /* context = await startanchor('', [{ name: 'voter', programid: program_id }], []) */
-        /* provider = new bankrunprovider(context) */
-        /* //eureka moment idl as unknown as Voter // i used 'as Idl' i didn't specify the <Voter> */
-        /* voterpogram = new program<voter>(idl as unknown as voter, provider) */
-    })
-
     it('Initialize Poll', async () => {
         await voterPogram.methods
             .initializePoll(
